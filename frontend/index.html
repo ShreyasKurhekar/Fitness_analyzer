@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Analyzer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --ink: #102a43;
+      --sky: #e0f2fe;
+      --teal: #0f766e;
+      --gold: #d97706;
+      --rose: #be123c;
+      --panel: rgba(255, 255, 255, 0.86);
+    }
+
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, rgba(14, 165, 233, 0.25), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.18), transparent 30%),
+        linear-gradient(135deg, #f8fafc 0%, #dbeafe 100%);
+      color: var(--ink);
+    }
+
+    .glass {
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+    }
+
+    .spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 4px solid rgba(15, 118, 110, 0.2);
+      border-top-color: var(--teal);
+      border-radius: 9999px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .fade-up {
+      animation: fadeUp 0.45s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div class="mx-auto max-w-6xl px-4 py-10 md:px-8">
+    <div class="mb-10 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+      <section class="glass rounded-[2rem] border border-white/60 p-8 fade-up">
+        <p class="mb-3 text-sm uppercase tracking-[0.35em] text-teal-700">Wellness Dashboard</p>
+        <h1 class="max-w-xl text-4xl font-bold leading-tight md:text-5xl">Fitness Analyzer for smarter health, food, and workout choices.</h1>
+        <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-700">
+          Enter your body stats, pick your goal, and get BMI insights, calorie guidance,
+          food nutrition suggestions, and a practical workout plan in one place.
+        </p>
+      </section>
+
+      <section class="glass rounded-[2rem] border border-white/60 p-8 fade-up">
+        <form id="fitnessForm" class="grid gap-5">
+          <div>
+            <label for="age" class="mb-2 block text-sm font-semibold uppercase tracking-[0.2em] text-slate-600">Age</label>
+            <input id="age" name="age" type="number" min="1" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-200" />
+          </div>
+
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label for="weight" class="mb-2 block text-sm font-semibold uppercase tracking-[0.2em] text-slate-600">Weight (kg)</label>
+              <input id="weight" name="weight" type="number" min="1" step="0.1" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-200" />
+            </div>
+
+            <div>
+              <label for="height" class="mb-2 block text-sm font-semibold uppercase tracking-[0.2em] text-slate-600">Height (cm)</label>
+              <input id="height" name="height" type="number" min="1" step="0.1" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-200" />
+            </div>
+          </div>
+
+          <div>
+            <label for="goal" class="mb-2 block text-sm font-semibold uppercase tracking-[0.2em] text-slate-600">Goal</label>
+            <select id="goal" name="goal" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-200">
+              <option value="lose">Lose</option>
+              <option value="gain">Gain</option>
+              <option value="maintain">Maintain</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="food" class="mb-2 block text-sm font-semibold uppercase tracking-[0.2em] text-slate-600">Food Items</label>
+            <input id="food" name="food" type="text" placeholder="chicken, rice, egg" required class="w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-200" />
+            <p class="mt-2 text-sm text-slate-500">Enter multiple foods separated by commas.</p>
+          </div>
+
+          <button type="submit" class="mt-2 rounded-2xl bg-teal-700 px-6 py-4 text-base font-semibold text-white transition hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-200">
+            Analyze
+          </button>
+        </form>
+      </section>
+    </div>
+
+    <div id="status" class="hidden rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-700"></div>
+
+    <div id="loading" class="hidden items-center justify-center gap-4 rounded-[2rem] glass border border-white/60 px-6 py-8 text-lg font-semibold text-slate-700">
+      <div class="spinner"></div>
+      <span>Analyzing your data...</span>
+    </div>
+
+    <section id="results" class="mt-8 hidden grid gap-6 lg:grid-cols-3">
+      <article class="glass rounded-[2rem] border border-white/60 p-6 fade-up">
+        <p class="text-sm uppercase tracking-[0.25em] text-slate-500">Health Card</p>
+        <div class="mt-4 flex items-center gap-3">
+          <h2 class="text-4xl font-bold" id="bmiValue">0.00</h2>
+          <span id="bmiBadge" class="rounded-full px-3 py-1 text-sm font-semibold text-white">Normal</span>
+        </div>
+        <p class="mt-3 text-slate-600">BMI Category and calorie guidance based on your current goal.</p>
+        <div class="mt-6 rounded-2xl bg-slate-900/90 px-4 py-4 text-white">
+          <p class="text-sm uppercase tracking-[0.2em] text-slate-300">Daily Calories</p>
+          <p id="dailyCalories" class="mt-2 text-3xl font-bold">0</p>
+        </div>
+      </article>
+
+      <article class="glass rounded-[2rem] border border-white/60 p-6 fade-up">
+        <p class="text-sm uppercase tracking-[0.25em] text-slate-500">Food Nutrition Card</p>
+        <ul id="foodResults" class="mt-5 space-y-3 text-slate-700"></ul>
+      </article>
+
+      <article class="glass rounded-[2rem] border border-white/60 p-6 fade-up">
+        <p class="text-sm uppercase tracking-[0.25em] text-slate-500">Workout Plan Card</p>
+        <div id="workoutResults" class="mt-5 flex flex-wrap gap-3"></div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    function getApiUrl() {
+      if (window.location.protocol === "file:") {
+        return "http://127.0.0.1:8000/analyze";
+      }
+
+      return new URL("/analyze", window.location.origin).toString();
+    }
+
+    const API_URL = getApiUrl();
+    const form = document.getElementById("fitnessForm");
+    const loading = document.getElementById("loading");
+    const results = document.getElementById("results");
+    const statusBox = document.getElementById("status");
+    const bmiValue = document.getElementById("bmiValue");
+    const bmiBadge = document.getElementById("bmiBadge");
+    const dailyCalories = document.getElementById("dailyCalories");
+    const foodResults = document.getElementById("foodResults");
+    const workoutResults = document.getElementById("workoutResults");
+
+    function showError(message) {
+      statusBox.textContent = message;
+      statusBox.classList.remove("hidden");
+    }
+
+    function clearError() {
+      statusBox.textContent = "";
+      statusBox.classList.add("hidden");
+    }
+
+    function bmiBadgeClasses(category) {
+      if (category === "Normal") {
+        return "bg-emerald-600";
+      }
+      if (category === "Overweight") {
+        return "bg-amber-500";
+      }
+      return "bg-rose-600";
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearError();
+      results.classList.add("hidden");
+      loading.classList.remove("hidden");
+      loading.classList.add("flex");
+
+      const payload = {
+        age: Number(form.age.value),
+        weight: Number(form.weight.value),
+        height: Number(form.height.value),
+        goal: form.goal.value,
+        food: form.food.value.trim(),
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.detail || "Unable to analyze fitness data.");
+        }
+
+        const data = await response.json();
+        bmiValue.textContent = data.bmi.toFixed(2);
+        bmiBadge.textContent = data.bmi_category;
+        bmiBadge.className = `rounded-full px-3 py-1 text-sm font-semibold text-white ${bmiBadgeClasses(data.bmi_category)}`;
+        dailyCalories.textContent = data.daily_calories;
+
+        foodResults.innerHTML = data.food_results.map((item) => `
+          <li class="rounded-2xl border border-slate-200 bg-white/70 px-4 py-3">${item}</li>
+        `).join("");
+
+        workoutResults.innerHTML = data.workout.map((item) => `
+          <span class="rounded-full bg-sky-100 px-4 py-2 text-sm font-semibold text-sky-800">${item}</span>
+        `).join("");
+
+        results.classList.remove("hidden");
+      } catch (error) {
+        const isNetworkError = error instanceof TypeError;
+        showError(
+          isNetworkError
+            ? "Could not connect to the API. Start the app with `uvicorn main:app --reload` and open http://127.0.0.1:8000."
+            : (error.message || "Something went wrong while contacting the API.")
+        );
+      } finally {
+        loading.classList.add("hidden");
+        loading.classList.remove("flex");
+      }
+    });
+  </script>
+</body>
+</html>
